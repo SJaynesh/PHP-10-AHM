@@ -39,17 +39,6 @@ class Config
         return $res;
     }
 
-    public function deleteStudent($id)
-    {
-        $this->connect();
-
-        $query = "DELETE FROM students WHERE id=$id;";
-
-        $res = mysqli_query($this->conn, $query); // return true / number of deleted record 1
-
-        return $res;
-    }
-
     public function fetchSingleStudent($id)
     {
         $this->connect();
@@ -59,6 +48,26 @@ class Config
         $res = mysqli_query($this->conn, $query); // return obj of mysqli_result class 
 
         return $res;
+    }
+
+    public function deleteStudent($id)
+    {
+        $this->connect();
+
+        $result = $this->fetchSingleStudent($id);
+
+        $data = mysqli_fetch_assoc($result);
+
+        if ($data) {
+            $query = "DELETE FROM students WHERE id=$id;";
+
+            $res = mysqli_query($this->conn, $query); // return true / number of deleted record 1
+
+            return $res;
+        } else {
+            return false;
+        }
+
     }
 
     public function updateStudent($name, $age, $course, $id)
