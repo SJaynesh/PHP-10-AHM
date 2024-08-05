@@ -6,6 +6,8 @@ class Config
     private $PASSWORD = "";
 
     private $DB_NAME = "php-10";
+    private $STUDENT_TABLE = "students";
+    private $USER_TABLE = "users";
 
     public $conn;
 
@@ -20,7 +22,7 @@ class Config
     {
         $this->connect();
 
-        $query = "INSERT INTO students (name,age,course) VALUES('$name', $age, '$course');";
+        $query = "INSERT INTO $this->STUDENT_TABLE (name,age,course) VALUES('$name', $age, '$course');";
 
 
         $res = mysqli_query($this->conn, $query); //  return bool
@@ -32,7 +34,7 @@ class Config
     {
         $this->connect();
 
-        $query = "SELECT * FROM students;";
+        $query = "SELECT * FROM $this->STUDENT_TABLE;";
 
         $res = mysqli_query($this->conn, $query); // return obj of mysqli_result class 
 
@@ -43,7 +45,7 @@ class Config
     {
         $this->connect();
 
-        $query = "SELECT * FROM students WHERE id=$id;";
+        $query = "SELECT * FROM $this->STUDENT_TABLE WHERE id=$id;";
 
         $res = mysqli_query($this->conn, $query); // return obj of mysqli_result class 
 
@@ -59,7 +61,7 @@ class Config
         $data = mysqli_fetch_assoc($result);
 
         if ($data) {
-            $query = "DELETE FROM students WHERE id=$id;";
+            $query = "DELETE FROM $this->STUDENT_TABLE WHERE id=$id;";
 
             $res = mysqli_query($this->conn, $query); // return true / number of deleted record 1
 
@@ -74,12 +76,64 @@ class Config
     {
         $this->connect();
 
-        $query = "UPDATE students SET name='$name', age=$age, course='$course' WHERE id=$id;";
+        $result = $this->fetchSingleStudent($id);
+
+        $data = mysqli_fetch_assoc($result);
+
+        if ($data) {
+
+            $query = "UPDATE $this->STUDENT_TABLE SET name='$name', age=$age, course='$course' WHERE id=$id;";
+
+
+            $res = mysqli_query($this->conn, $query); //  return bool
+
+            return $res;
+        } else {
+            return false;
+        }
+
+    }
+
+    // Auth USER
+
+    public function singUp($name, $email, $password)
+    {
+        $this->connect();
+
+        // password_hash(raw_password, algoridhm)  return hased Password (string)
+        $hased_password = password_hash($password, PASSWORD_DEFAULT);
+
+        $query = "INSERT INTO $this->USER_TABLE (name,email,password) VALUES('$name', '$email', '$hased_password');";
 
 
         $res = mysqli_query($this->conn, $query); //  return bool
 
         return $res;
     }
+
+    public function signIn($email, $password)
+    {
+        $this->connect();
+
+        $query = "SELECT * FROM $this->USER_TABLE WHERE email='$email';";
+
+        $res = mysqli_query($this->conn, $query);
+
+        $result = mysqli_fetch_assoc($res);
+
+        if ($result) {
+            $hased_password = $result['password'];
+
+            // password_verify(raw_password, hased_password)  return bool
+            $passwordVerify = password_verify($password, $hased_password);
+
+            return $passwordVerify;
+
+        } else {
+            return false;
+        }
+    }
+
+
 }
 ?>
