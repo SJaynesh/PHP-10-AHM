@@ -8,6 +8,9 @@ class Config
     private $DB_NAME = "php-10";
     private $STUDENT_TABLE = "students";
     private $USER_TABLE = "users";
+    private $DEPT_TABLE = "department";
+    private $MEMBER_TABLE = "members";
+    private $MEDIA_TABLE = "media";
 
     public $conn;
 
@@ -132,6 +135,89 @@ class Config
         } else {
             return false;
         }
+    }
+
+
+    // Department Table
+
+    public function insertDepartment($name)
+    {
+        $this->connect();
+
+        $query = "INSERT INTO $this->DEPT_TABLE (name) VALUES('$name');";
+
+
+        return mysqli_query($this->conn, $query); //  return bool
+    }
+
+    public function insertMembers($name, $dept_id)
+    {
+        $this->connect();
+
+        $query = "INSERT INTO $this->MEMBER_TABLE (name,department_id) VALUES('$name', $dept_id);";
+
+
+        return mysqli_query($this->conn, $query); //  return bool
+    }
+
+
+    // Media Table
+
+    public function insertMedia($name)
+    {
+        $this->connect();
+
+        $query = "INSERT INTO $this->MEDIA_TABLE (name) VALUES('$name');";
+
+
+        $res = mysqli_query($this->conn, $query); //  return bool
+
+        return $res;
+    }
+
+    public function fetchSingleMedia($id)
+    {
+        $this->connect();
+
+        $query = "SELECT * FROM $this->MEDIA_TABLE WHERE id=$id;";
+
+        $res = mysqli_query($this->conn, $query); // return obj of mysqli_result class 
+
+        $record = mysqli_fetch_assoc($res);
+
+        if ($record) {
+            return $record;
+        } else {
+            return false;
+        }
+    }
+
+    public function deleteMedia($id)
+    {
+        $this->connect();
+
+        $record = $this->fetchSingleMedia($id);
+
+        if ($record) {
+            $file_name = $record['name'];
+
+            $isMediaDeleted = unlink("../../upload/" . $file_name);
+
+            if ($isMediaDeleted) {
+
+                $query = "DELETE FROM $this->MEDIA_TABLE WHERE id=$id;";
+
+                $res = mysqli_query($this->conn, $query); //  return bool
+
+                return $res;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+
     }
 
 
